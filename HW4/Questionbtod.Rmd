@@ -1,0 +1,29 @@
+---
+title: HW4 Qb-Qd
+author: Suheng Yao
+date: September 24, 2024
+output: pdf_document
+---
+
+### Question b
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+combined_data[combined_data==99 | combined_data==999] <- NA
+print(head(combined_data))
+```
+It may not be always appropriate to convert 99 or 999 to NA because sometimes 99 or 999 could be meaningful data points, and converting them to NA will cause data loss and affect the model's performance. Also, some missing values are in the columns with only character or factor values, converting them directly with NA may not be helpful with further data cleaning steps.
+Further analysis on the pattern of NA:
+```{r}
+total_missing <- sum(is.na(combined_data)) # find the total number of missing value in data
+print(total_missing)
+missing_col <- colSums(is.na(combined_data)) # find the number of missing values in each column
+print(missing_col)
+```
+```{r}
+barplot(missing_col, main = "Missing Values in Each Column", 
+        ylab = "Count of Missing Values", las = 2)
+```
+

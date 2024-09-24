@@ -1,10 +1,13 @@
 library(data.table)
 library(stringr)
+library(lubridate)
+library(dplyr)
+library(tidyr)
 file_root<-"https://www.ndbc.noaa.gov/view_text_file.php?filename=44013h"
 years<-1985:2023
 df_list <- list() # create an empty list to store data
 tail<- ".txt.gz&dir=data/historical/stdmet/"
-all_columns <- c("#YY", "MM", "DD", "hh", "mm", "WDIR", "WSPD", "GST", "WVHT", 
+all_columns <- c("YY", "MM", "DD", "hh", "mm", "WDIR", "WSPD", "GST", "WVHT", 
                  "DPD", "APD", "MWD", "PRES", "ATMP", "WTMP", "DEWP", "VIS", 
                  "TIDE")
 # Function to determine lines to skip
@@ -48,6 +51,28 @@ for (year in years) {
 
 # Combine all the datasets into one data.table
 combined_data <- rbindlist(df_list, use.names = TRUE, fill = TRUE)
+
+# Define a function to convert two digit years into four digit years
+convert_2_4 <- function(year){
+  ifelse(year < 100, ifelse(year<25, 2000+year, 1900+year), year)
+}
+
+# convert the 2 digit year to 4 digit year and combine three columns describing year 
+combined_data <- combined_data %>% 
+  mutate(YY=convert_2_4(YY))%>% 
+  mutate(YYYY = coalesce(YYYY, `#YY`, YY)) %>% 
+  select(-`#YY`, -YY) %>% select(YYYY, everything())
+
+# create a proper datetime column
+combined_data <- combined_data %>%
+  mutate(
+    new_mm = replace_na(mm, 0),
+    DateTime = make_datetime(year = YYYY, month = MM, day = DD, 
+                             hour = hh, min = new_mm, 
+                             tz = "America/New_York")
+  ) %>% select(-new_mm, -YYYY, -MM, -DD, -hh, -mm) %>%
+  select(DateTime, everything())
+
 
 # View the first few rows of the combined dataset
 print(head(combined_data))
