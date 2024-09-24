@@ -4,7 +4,7 @@ file_root<-"https://www.ndbc.noaa.gov/view_text_file.php?filename=44013h"
 years<-1985:2023
 df_list <- list() # create an empty list to store data
 tail<- ".txt.gz&dir=data/historical/stdmet/"
-all_columns <- c("YY", "MM", "DD", "hh", "mm", "WDIR", "WSPD", "GST", "WVHT", 
+all_columns <- c("#YY", "MM", "DD", "hh", "mm", "WDIR", "WSPD", "GST", "WVHT", 
                  "DPD", "APD", "MWD", "PRES", "ATMP", "WTMP", "DEWP", "VIS", 
                  "TIDE")
 # Function to determine lines to skip
@@ -29,7 +29,7 @@ read_file <- function(year){
   path<-paste0(file_root,year,tail) # combine and create the whole URL
   header<-scan(path,what='character',nlines=1)
   skip_line <- lines_to_skip(path) # determine how many lines to skip
-  buoy<-fread(path,header=FALSE,skip=skip_line, fill=TRUE)
+  buoy<-fread(path,header=FALSE,skip=skip_line, fill=Inf)
   # manually assign the header
   colnames(buoy)<-header
   col_miss <- setdiff(all_columns, names(buoy))
