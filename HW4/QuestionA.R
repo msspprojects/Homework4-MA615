@@ -13,11 +13,11 @@ all_columns <- c("YY", "MM", "DD", "hh", "mm", "WDIR", "WSPD", "GST", "WVHT",
 # Function to determine lines to skip
 lines_to_skip <- function(path){
   content <- file(path, open = "r") # read the file
-  first3 <- readLines(content, n = 2) # read the first three lines
+  first2 <- readLines(content, n = 2) # read the first two lines
   close(content)
   
   # check if the second line are all numbers
-  second_line <- str_split(first3[2], "\\s+", simplify = TRUE)
+  second_line <- str_split(first2[2], "\\s+", simplify = TRUE)
   check_numeric <- str_detect(second_line, "^-?\\d*\\.?\\d+$")
   
   if (all(check_numeric)){
