@@ -32,7 +32,7 @@ barplot(missing_percent, main = "Percentage Missing in Each Column",
 ```
 The graph shows that there are a lot of missing values in VIS and TIDE variables. In most of the datasets from 1985 to 2023, the station visibility data(VIS) is filled with 99, and only starting from 2000, the TIDE variable had been added to the data. So VIS and TIDE tend to have a lot of missing values. Also, MWD(Wave Measurements), WD(Wind Directions) and BAR(Pressure) get a lot of missing values because WD and BAR are all old metrics, and the station stop using those labels long time ago, adn for MWD, the reason could be related to that the wave measurements are not directly measured by sensors on board the buoys.
 
-### Question C
+### Question c
 ```{r}
 library(ggplot2)
 library(dplyr)
@@ -49,16 +49,61 @@ ggplot(combined_data, aes(x = DateTime, y = WTMP)) +
 mean_year_air <- combined_data %>%
   mutate(Year = as.integer(format(DateTime, "%Y"))) %>%
   group_by(Year) %>%
-  summarise(mean_atmp = mean(ATMP, na.rm = TRUE))
-print(mean_year_air)
+  summarise(mean_atmp = mean(ATMP, na.rm = TRUE)) %>%
+  filter(!is.na(mean_atmp))
+
+ggplot(mean_year_air, aes(x=Year, y=mean_atmp))+
+  geom_line()+
+  labs(x = "Datetime", y = "Celsius", title = "Mean Air Temperature Change Over Time")+
+  theme_minimal()
 
 mean_year_sea <- combined_data %>%
   mutate(Year = as.integer(format(DateTime, "%Y"))) %>%
   group_by(Year) %>%
   summarise(mean_wtmp = mean(WTMP, na.rm = TRUE))
-print(mean_year_sea)
+
+ggplot(mean_year_sea, aes(x=Year, y=mean_wtmp))+
+  geom_line()+
+  labs(x = "Datetime", y = "Celsius", title = "Mean Sea Surface Temperature Change Over Time")+
+  theme_minimal()
 ```
-After drawing the ATMP(Air Temperature) and WTMP(Sea Surface Temperature) change over time, I can clearly see that temperature in 2023 is much higher than temperature in 1985, indicating that the climate change is a real issue. Also, from the mean air and sea surface temperature calculated each year, the average temperature in 2023 is clearly higher than 1985, indicating both temperature are rising.
+After drawing the ATMP(Air Temperature) and WTMP(Sea Surface Temperature) change over time, I can clearly see that temperature in 2023 is much higher than temperature in 1985, indicating that the climate change is a real issue. Also, from the mean air and sea surface temperature line graph, the average temperature is clearly increasing from 1985 to 2023, especially for the sea surface temperature.
 
 ### Question d
+```{r}
+library(lubridate)
+library(dplyr)
+df <- read.csv("Rainfall.csv")
+df$DATE <- ymd_hm(df$DATE) # change the column to a date-time object
+
+# Plot the average rainfall changing over time
+mean_year_rain <- df %>%
+  mutate(Year = as.integer(format(DATE, "%Y"))) %>%
+  group_by(Year) %>%
+  summarise(mean_rain = mean(HPCP, na.rm = TRUE))
+
+ggplot(mean_year_rain, aes(x=Year, y=mean_rain))+
+  geom_line()+
+  labs(x = "Year", y = "Rainfall in mm", title = "Average Rainfall Each Year")+
+  theme_minimal()
+
+# summary of the distribution of the mean rainfall
+dist_stats <- data.frame(
+  Standard_Deviation = sd(mean_year_rain$mean_rain, na.rm = TRUE),
+  Variance = var(mean_year_rain$mean_rain, na.rm = TRUE),
+  IQR = IQR(mean_year_rain$mean_rain, na.rm = TRUE),
+  Min = min(mean_year_rain$mean_rain, na.rm = TRUE),
+  Max = max(mean_year_rain$mean_rain, na.rm = TRUE),
+  Median = median(mean_year_rain$mean_rain, na.rm = TRUE)
+)
+print(dist_stats)
+
+```
+From the plot of the average rainfall, it is clear that there is a significant decrease in rainfall from 1990 to 1998. Also, from the summary table shown, the standard deviation is 0.013, and the IQR is 0.026, indicating that the data is quite spread out. Additionally, there is a 0.04 difference between min value and max value, showing that the variability in rainfall data is intense.
+```{r}
+df <- df %>% rename(DateTime=DATE)
+combined_rain <- inner_join(combined_data, df, by="DateTime")
+modeld <- lm()
+```
+
 
