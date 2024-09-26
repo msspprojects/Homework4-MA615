@@ -21,9 +21,15 @@ total_missing <- sum(is.na(combined_data)) # find the total number of missing va
 print(total_missing)
 missing_col <- colSums(is.na(combined_data)) # find the number of missing values in each column
 print(missing_col)
+
+# find the percentage of missing values in each column
+missing_percent <- (colSums(is.na(combined_data))/nrow(combined_data)) * 100
+print(missing_percent)
 ```
 ```{r}
 barplot(missing_col, main = "Missing Values in Each Column", 
         ylab = "Count of Missing Values", las = 2)
+barplot(missing_percent, main = "Percentage Missing in Each Column",
+        ylab = "Percentage of Missing Values", las=2)
 ```
-
+The graph shows that there are a lot of missing values in VIS and TIDE variables. In most of the datasets from 1985 to 2023, the station visibility data(VIS) is filled with 99, and only starting from 2000, the TIDE variable had been added to the data.
