@@ -9,6 +9,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+source("QuestionA.R")
 ```
 ```{r}
 combined_data[combined_data==99 | combined_data==999] <- NA
@@ -100,10 +101,20 @@ print(dist_stats)
 
 ```
 From the plot of the average rainfall, it is clear that there is a significant decrease in rainfall from 1990 to 1998. Also, from the summary table shown, the standard deviation is 0.013, and the IQR is 0.026, indicating that the data is quite spread out. Additionally, there is a 0.04 difference between min value and max value, showing that the variability in rainfall data is intense.
-```{r}
+```{r, warning=FALSE}
 df <- df %>% rename(DateTime=DATE)
 combined_rain <- inner_join(combined_data, df, by="DateTime")
-modeld <- lm()
+plot(log(combined_rain$DEWP), combined_rain$HPCP)
+plot(log(combined_rain$ATMP), combined_rain$HPCP)
 ```
+Since the air temperature and dew point temperature are related to the amount of rainfall, and from the two graphs above, there are some patterns within the scatterplot, it is a good idea to fit a simple linear regression to try to predict the amount of rainfall:
+```{r}
+combined_rain <- combined_rain %>%
+  filter(!is.na(DEWP) & !is.na(ATMP))
 
+modeld <- lm(HPCP~ATMP+DEWP, 
+             data = combined_rain)
+summary(modeld)
+```
+From the output of the model, both variables are statistically significant, with p-values less than 0.05, but the $R^2$ is only 0.01046, indicating that only 1% variability is explained by the model, so this is not a good model to fit. To improve, since the rainfall data may be dependent on time, in the future exploration, I could try time series analysis model to capture the pattern.
 
